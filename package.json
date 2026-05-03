@@ -1,0 +1,28 @@
+{
+  "name": "yjs-collab-demo",
+  "version": "0.1.0",
+  "description": "Minimal real-time collaborative editor demo using Yjs CRDT + Hocuspocus + WebSocket",
+  "type": "module",
+  "scripts": {
+    "server": "node server.mjs",
+    "client": "npx --yes serve client -p 5173",
+    "start": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "keywords": [
+    "yjs",
+    "crdt",
+    "hocuspocus",
+    "real-time-collaboration",
+    "websocket",
+    "shared-editing"
+  ],
+  "license": "MIT",
+  "author": "Liqq",
+  "dependencies": {
+    "@hocuspocus/server": "^3.4.4",
+    "yjs": "^13.6.30"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  }
+}
