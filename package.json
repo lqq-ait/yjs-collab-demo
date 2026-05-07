@@ -6,7 +6,9 @@
   "scripts": {
     "server": "node server.mjs",
     "client": "npx --yes serve client -p 5173",
-    "start": "concurrently \"npm run server\" \"npm run client\""
+    "start": "concurrently -n server,client -c green,cyan \"npm run server\" \"npm run client\"",
+    "test": "node --test --test-timeout=15000 test/sync.test.mjs",
+    "test:browser": "node --test --test-timeout=15000 test/browser-shape.test.mjs"
   },
   "keywords": [
     "yjs",
@@ -23,6 +25,8 @@
     "yjs": "^13.6.30"
   },
   "devDependencies": {
-    "concurrently": "^9.0.0"
+    "@hocuspocus/provider": "^4.0.0",
+    "concurrently": "^9.0.0",
+    "ws": "^8.20.0"
   }
 }
