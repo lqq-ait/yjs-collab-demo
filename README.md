@@ -75,6 +75,41 @@ npm run client         # 只跑前端静态文件 (:5173)
 
 dev 跑测试**不需要先停 server**：测试用 1235 独立端口，互不干扰。
 
+## 5 分钟手动验收（HR / 面试官 friendly）
+
+跑完 `npm start` 后浏览器打开两个 tab：`http://localhost:5173`，按这个清单逐步验证。
+全 ✅ 即处于"简历可演示"状态。
+
+> 5173 被占？改 `package.json` 的 `"client"` script 里的 `-p 5173` 为其他端口（serve 不会自动 fallback）。
+
+### Step 1 — 实时同步
+1. 顶部状态点变绿、显示 `connected`
+2. `Connected peers` 列表两个 tab 互相能看到对方（不同色 tag）
+3. 在 tab A 的 textarea 输入 `hello`
+4. ✅ tab B 立刻出现 `hello`（亚秒级）
+
+### Step 2 — 并发合并（CRDT 核心卖点）
+1. 两个 tab 各点 5-6 次 `Insert random char (test concurrent merge)` 按钮
+2. ✅ 最终两边文本字符序列**完全一致**（无 split-brain，无字符丢失）
+
+### Step 3 — 离线 + 重连（CRDT 杀手锏）
+1. tab A 点 `Disconnect`，按钮变成 `Reconnect`，log 区显示 `status → disconnected`
+2. tab A 在 textarea 末尾输入 `offline-A`
+3. tab B 输入 `online-B`
+4. ✅ A 仍 disconnected 时，A 看不到 `online-B`，B 看不到 `offline-A`（确认隔离）
+5. tab A 点 `Reconnect`
+6. ✅ 数百毫秒内，**两边文本同时包含** `offline-A` 和 `online-B`（CRDT 自动合并，无人工冲突解决）
+
+### Step 4 — Awareness（presence 实时性）
+1. 关闭 tab B
+2. ✅ tab A 的 `Connected peers` 列表在 ~5 秒内收缩到只剩自己
+
+### Step 5 — Console 健康
+- ✅ DevTools Console **0 红 0 警告**
+  （`favicon 404` 已用 inline SVG 修；Yjs#438 双 import 警告已用 importmap + `?external=yjs` 修）
+
+> 想跳过手测？跑 `npm test && npm run test:browser`，6 条自动化测试覆盖等价场景（除 console 健康外）。
+
 ## 自动化测试
 
 ```bash

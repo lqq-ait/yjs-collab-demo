@@ -193,18 +193,30 @@
       log(`status → ${status}`)
     })
 
-    // Y.Text → textarea (avoid feedback loop via flag)
-    let applyingRemote = false
-    ytext.observe(() => {
-      if (document.activeElement === editor && !applyingRemote) return
-      applyingRemote = true
-      editor.value = ytext.toString()
-      applyingRemote = false
+    // Y.Text → textarea. Use Yjs `transaction.local` to filter out our own
+    // edits (the previous `document.activeElement === editor` guard also
+    // blocked *remote* updates while the user had focus, so reconnect's
+    // server push never landed in the textarea).
+    ytext.observe((_event, transaction) => {
+      if (transaction.local) return
+      const next = ytext.toString()
+      if (editor.value === next) return
+      // Preserve cursor on remote update
+      const start = editor.selectionStart
+      const end = editor.selectionEnd
+      editor.value = next
+      try {
+        editor.setSelectionRange(
+          Math.min(start, next.length),
+          Math.min(end, next.length),
+        )
+      } catch {}
     })
     // Initial sync
     editor.value = ytext.toString()
 
-    // textarea → Y.Text
+    // textarea → Y.Text. Wrapped in a transaction so the entire
+    // delete+insert lands as one observe call (and is tagged `local`).
     editor.addEventListener('input', () => {
       doc.transact(() => {
         ytext.delete(0, ytext.length)
